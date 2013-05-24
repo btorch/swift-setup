@@ -1,0 +1,45 @@
+# Swift-setup Configuration File
+
+[common]
+ssh_user = swiftops
+ssh_key = /tmp/id_rsa_swiftops.priv
+base_dir = /etc/swift-setup
+
+[swift_common]
+swift_hash = supercrypthash
+admin_ip = 127.16.0.252
+syslog_ip = 172.16.0.252
+
+[proxy]
+pipeline = catch_errors healthcheck proxy-logging cache ratelimit authtoken keystoneauth proxy-logging proxy-server  
+memcache_maxmem = 512
+sim_connections = 1024
+memcache_server_list = 127.0.0.1:11211
+#informant_ip = 172.16.0.3
+
+[mailing]
+email_addr = me@mydomain.com
+pager_addr = mepager@mydomain.com
+smarthost = 172.16.0.252
+relay_net = 172.16.0.0/16
+outgoing_domain = swift.mydomain.com
+
+[versioning]
+versioning_system = git
+repository_base = /srv/git
+repository_name = swift-cluster-configs
+
+[keystone]
+keystone_ip = 172.16.0.252
+keystone_port = 35357
+keystone_auth_proto = http
+keystone_auth_port = 5000
+keystone_admin_tenant = services
+keystone_admin_user = tokenvalidator
+keystone_admin_key = noswifthere
+
+[dispersion]
+dis_tenant = dispersion
+dis_user = reporter
+dis_key = blahblah
+dis_coverage = 1
