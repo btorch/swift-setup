@@ -114,10 +114,13 @@ class TemplateGen(object):
         Used to modify the templates files that have placeholders
         with the information found in the config file
         """
-        self._update_common()
-        self._update_admin()
-        self._update_proxy()
-        self._update_storage()
-        f = open(self.tmpl_dir + '/.initialized', 'w')
-        f.close()
+        if os.path.isfile(self.tmpl_dir + '/.initialized'):
+            return False
+        else:
+            self._update_common()
+            self._update_admin()
+            self._update_proxy()
+            self._update_storage()
+            f = open(self.tmpl_dir + '/.initialized', 'w')
+            f.close()
         return True

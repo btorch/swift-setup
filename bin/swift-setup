@@ -116,9 +116,12 @@ def main():
             _init_parser.print_help()
             sys.exit(1) 
         else:
-            print "Initializing template files ... "
             initialize = TemplateGen(options.config, os.path.dirname(options.config))
-            initialize.template_setup()
+            if initialize.template_setup():
+                print "\t Template files have been initialized"
+                print "\t Location: " + os.path.dirname(options.config) + "/templates"
+            else:
+                print "\t Template files have already been initialied before (aborting)"
 
     if cmd == 'deploy':
         _deploy_parser = OptionParser(usage=_deploy_usage)
