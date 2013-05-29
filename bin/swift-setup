@@ -116,9 +116,9 @@ def main():
             _init_parser.print_help()
             sys.exit(1) 
         else:
-            print "calling init function\n"
+            print "Initializing template files ... "
             initialize = TemplateGen(config, os.path.dirname(config))
-            ret = initialize.templates()
+            initialize.template_setup()
 
     if cmd == 'deploy':
         _deploy_parser = OptionParser(usage=_deploy_usage)

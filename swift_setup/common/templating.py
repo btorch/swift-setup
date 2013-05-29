@@ -99,7 +99,7 @@ Class TemplateGen(object):
         usr_location = self.tmpl_dir + '/storage/usr/local/bin/'
         templates = {
             usr_location + 'drive_mount_check.py': ('OUTGOING_DOMAIN',
-                                                   'EMAIL_ADDR')
+                                                    'EMAIL_ADDR')
         }
         _update_files(templates)
 
@@ -116,10 +116,9 @@ Class TemplateGen(object):
         }
         _update_files(templates)
 
-    def template_updates(self):
+    def template_setup(self):
         """
         Used to modify the templates files that have placeholders
         with the information found in the config file
         """
-        _update_common()
-        _update_proxy()
+        _update_storage()
