@@ -84,8 +84,7 @@ class TemplateGen(object):
                                                    'KEYSTONE_AUTH_PORT',
                                                    'KEYSTONE_ADMIN_TENANT',
                                                    'KEYSTONE_ADMIN_USER',
-                                                   'KEYSTONE_ADMIN_KEY',
-                                                   'INFORMANT_IP'),
+                                                   'KEYSTONE_ADMIN_KEY')
         }
         self._update_files(templates)
 
