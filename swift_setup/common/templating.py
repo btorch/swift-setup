@@ -8,14 +8,6 @@ from swift_setup.common.exceptions import ConfigFileError, \
 from swift_setup.common.utils import readconf
 
 
-"""
-This is a dictionary that matches the template files that have
-placeholders with the keywords that need to be replacted by what
-has been set in the configuration file. The keywords below must
-match the keys in the configuration file.
-"""
-
-
 class TemplateGen(object):
     """
     This class is used for generation of the template files that
@@ -101,7 +93,7 @@ class TemplateGen(object):
             usr_location + 'drive_mount_check.py': ('OUTGOING_DOMAIN',
                                                     'EMAIL_ADDR')
         }
-        _update_files(templates)
+        self._update_files(templates)
 
     def _update_common(self):
         location = self.tmpl_dir + '/common/etc/'
@@ -121,4 +113,4 @@ class TemplateGen(object):
         Used to modify the templates files that have placeholders
         with the information found in the config file
         """
-        _update_storage()
+        self._update_storage()

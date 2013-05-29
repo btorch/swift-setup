@@ -117,7 +117,7 @@ def main():
             sys.exit(1) 
         else:
             print "Initializing template files ... "
-            initialize = TemplateGen(config, os.path.dirname(config))
+            initialize = TemplateGen(options.config, os.path.dirname(options.config))
             initialize.template_setup()
 
     if cmd == 'deploy':
