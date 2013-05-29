@@ -63,7 +63,9 @@ class TemplateGen(object):
     def _update_admin(self):
         location = self.tmpl_dir + '/admin/etc/'
         templates = {
-            location + 'swift/dispersion.conf': ('KEYSTONE_AUTH_URI',
+            location + 'swift/dispersion.conf': ('KEYSTONE_IP',
+                                                 'KEYSTONE_PORT',
+                                                 'KEYSTONE_AUTH_PROTO',
                                                  'KEYSTONE_ADMIN_TENANT',
                                                  'KEYSTONE_ADMIN_USER',
                                                  'KEYSTONE_ADMIN_KEY')
