@@ -68,7 +68,7 @@ class TemplateGen(object):
                                                  'KEYSTONE_ADMIN_USER',
                                                  'KEYSTONE_ADMIN_KEY')
         }
-        _update_files(templates)
+        self._update_files(templates)
 
     def _update_proxy(self):
         location = self.tmpl_dir + '/proxy/etc/'
@@ -85,7 +85,7 @@ class TemplateGen(object):
                                                    'KEYSTONE_ADMIN_KEY',
                                                    'INFORMANT_IP'),
         }
-        _update_files(templates)
+        self._update_files(templates)
 
     def _update_storage(self):
         usr_location = self.tmpl_dir + '/storage/usr/local/bin/'
@@ -106,7 +106,7 @@ class TemplateGen(object):
                                                         'SMARTHOST',
                                                         'RELAY_NET')
         }
-        _update_files(templates)
+        self._update_files(templates)
 
     def template_setup(self):
         """
