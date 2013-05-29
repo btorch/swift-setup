@@ -16,7 +16,7 @@ match the keys in the configuration file.
 """
 
 
-Class TemplateGen(object):
+class TemplateGen(object):
     """
     This class is used for generation of the template files that
     will be used by fabric to push files to the servers that will
