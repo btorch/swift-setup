@@ -36,7 +36,7 @@ class DeployNode(object):
         env.pool_size = 5
 
         "Keyring packages that might be needed"
-        keyrings = ['ubuntu-cloud-keyring']
+        self.keyrings = ['ubuntu-cloud-keyring']
 
         "Utilities that will be install on all systems by the common setup"
         self.general_tools = ['python-software-properties', 'patch',
@@ -53,29 +53,30 @@ class DeployNode(object):
             msg = 'SSH private key could not be located [%s]' % self.key
             raise ResponseError(status, msg)
 
-    def _common(self):
+    def _common_setup(self):
         """
         Start by updating the apt db and performing an upgrade of general
         packages avaialable. Then install the cloud keyring and some
         other general tools that may come in handy at some point.
         """
         with settings(hide('running', 'stdout', 'stderr')):
-            sudo('apt-get update -qq -o Acquire::http::No-Cache=True ')
-            sudo('export DEBIAN_FRONTEND=noninteractive; apt-get upgrade %s '
-                 % self.apt_opts)
-            sudo('apt-get install %s %s' % (self.apt_opts,
-                                            ' '.join(self.keyrings)))
+            sudo('''
+                 export DEBIAN_FRONTEND=noninteractive;
+                 apt-get update -qq -o Acquire::http::No-Cache=True;
+                 apt-get upgrade %s
+                 ''' % self.apt_opts)
             sudo('''
                  export DEBIAN_FRONTEND=noninteractive;
                  apt-get install %s %s
-                 ''' % (self.apt_opts, ' '.join(self.general_tools)))
+                 ''' % (self.apt_opts,
+                        ' '.join(self.keyrings + self.general_tools)))
 
     def deploy_me(self, type, platform, host_list):
         """
         This function is used to deploy the node type requested. It will
         use some helper function to accomplish this.
         """
-        execute(self._common, hosts=host_list)
+        execute(self._common_setup, hosts=host_list)
 
         disconnect_all()
         return True
