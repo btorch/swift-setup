@@ -16,15 +16,15 @@ class DeployNode(object):
 
     def __init__(self, conf_file):
         self.conf = readconf(conf_file, 'common')
-        self.user = conf['ssh_user']
-        self.key = conf['ssh_key']
-        self.apt_opts = conf['apt_options']
-        self.swift_generic = conf['swift_generic']
-        self.swift_proxy = conf['swift_proxy']
-        self.swift_storage = conf['swift_storage']
+        self.user = self.conf['ssh_user']
+        self.key = self.conf['ssh_key']
+        self.apt_opts = self.conf['apt_options']
+        self.swift_generic = self.conf['swift_generic']
+        self.swift_proxy = self.conf['swift_proxy']
+        self.swift_storage = self.conf['swift_storage']
 
-        if 'swift_others' in conf:
-            self.swift_others = conf['swift_others']
+        if 'swift_others' in self.conf:
+            self.swift_others = self.conf['swift_others']
         else:
             self.swift_others = None
 
