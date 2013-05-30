@@ -11,8 +11,11 @@ try:
 except ImportError:
     install_requires.append("fabric")
 
-data_files = [('/etc/swift-setup', 
-               ['etc/swift-setup.conf-sample'])]
+data_files = [('/etc/swift-setup', ['etc/swift-setup.conf-sample']),
+              ('/etc/swift-setup/hosts', ['etc/hosts/generic',
+                                          'etc/hosts/admin',
+                                          'etc/hosts/proxy',
+                                          'etc/hosts/storage'])]
       
 setup(
     name = name,
