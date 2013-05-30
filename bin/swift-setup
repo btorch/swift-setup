@@ -4,6 +4,7 @@ import os
 import sys
 from optparse import OptionParser
 from swift_setup.common.templating import TemplateGen
+from swift_setup.node.deploy import DeployNode
 from swift_setup.common.exceptions import HostListError, ResponseError
 from swift_setup.common.utils import generate_hosts_list
 
