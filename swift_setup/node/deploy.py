@@ -75,7 +75,7 @@ class DeployNode(object):
         use some helper function to accomplish this.
         """
         with settings(hide('running', 'stdout', 'stderr')):
-            execute(_common, hosts=host_list)
+            execute(self._common, hosts=host_list)
 
         disconnect_all()
         return True
