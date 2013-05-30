@@ -3,7 +3,11 @@
 [common]
 ssh_user = swiftops
 ssh_key = /tmp/id_rsa_swiftops.priv
-base_dir = /etc/swift-setup
+swift_generic = swift python-swift python-swiftclient
+swift_proxy = swift-proxy python-keystone python-keystoneclient memcached python-memcache
+swift_storage = swift-account swift-container swift-object
+swift_others = python-suds python-slogging
+apt_options = -y -qq --force-yes -o Dpkg::Options::=--force-confdef
 
 [swift_common]
 swift_hash = supercrypthash
@@ -15,7 +19,6 @@ pipeline = catch_errors healthcheck proxy-logging cache ratelimit authtoken keys
 memcache_maxmem = 512
 sim_connections = 1024
 memcache_server_list = 127.0.0.1:11211
-#informant_ip = 172.16.0.3
 
 [mailing]
 email_addr = me@mydomain.com
