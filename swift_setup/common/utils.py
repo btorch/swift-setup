@@ -24,9 +24,40 @@ def readconf(conf_file, section=None):
     if section:
         if c.has_section(section):
             conf = dict(c.items('common') + c.items(section))
-
     else:
         conf = {}
         for s in c.sections():
             conf.update({s: dict(c.items(s))})
     return conf
+
+def generate_hosts_list(base_dir, host_group):
+    '''
+    Generates the list of hosts from a host group file and
+    than feeds that list to the proper fabric roles.
+    '''
+    host_path = base_dir + '/hosts'
+    host_file = host_path + '/' + host_group
+    host_list = []
+    try:
+        if os.path.isfile(host_file):
+            with open(host_file, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        if not line.startswith('#'):
+                            host_list.append(line)
+        else:
+            status = 404
+            msg = "Host group file not found (%s)" % dsh_file
+            raise HostListError(status, msg)
+    except:
+        status = 404
+        msg = "Problem reading host group file (%s)" % dsh_file
+        raise HostListError(status, msg)
+
+    if host_list:
+        return host_list
+    else:
+        status = 204
+        msg = "Host group file has no content (%s)" % dsh_file
+        raise HostListError(status, msg)
