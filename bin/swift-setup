@@ -4,68 +4,64 @@ import os
 import sys
 from optparse import OptionParser
 from swift_setup.common.templating import TemplateGen
+from swift_setup.common.exceptions import HostListError, ResponseError
+from swift_setup.common.utils import generate_hosts_list
+
 
 def main():
-
-    
     _main_usage = '''
     Below are the avaialble swift-setup commands:
-    
-    swift-setup templates
-        The command above will generate configuration files for the all nodes
-        within the swift cluster from the templates provided. Once these
-        templates have been generated, one can add/edit/remove as desired
-        before calling the 'swift-setup init' command.
 
     swift-setup init
-        The command above will configure the admin system to be used for
-        deploying swift nodes. The admin system can have several tasks
-        associated with it, among them are:
+        The command above should be run on the system where swift-setup
+        has been installed. This should be your local system that one
+        will use to deploy the swift systems remotely.
+
+        The command above will initialize some of the files
+        located under /etc/swift-setup/templates with information
+        provided within the swift-settup.conf configuration file.
+
+    swift-setup deploy [options]
+        The command above is used to deploy swift nodes such as admin,
+        proxy, storage, saio (proxy + storage services) and generic
+        swift systems.
+
+        Admin System:
             - git repository server
             - webserver for swift reports
             - central syslog system if dedicated box not available
             - ring builder server
             - proxy setup for account creation management
             - etc ...
-   
-    swift-setup deploy [options]
-        The command above is used to deploy swift nodes such as proxy, storage
-        or all-in-one nodes (proxy + storage services). To view more
-        information on 'deploy' command please run 'swift-setup help deploy'.
-        
+
         For more information please run 'swift-setup deploy --help'
-    '''
-
-    _templates_usage = '''
-    %prog templates
-
-    The command above will generate configuration files for the all nodes
-    within the swift cluster from the templates provided. Once these
-    templates have been generated, one can add/edit/remove as desired
-    before calling the 'swift-setup init' command.
-
-    The generated files will be located under /etc/swift-setup/templates
     '''
 
     _init_usage = '''
     %prog init
-        The command above will configure the admin system to be used for
-        deploying swift nodes. The admin system can have several tasks
-        associated with it, among them are:
+        The command above should be run on the system where swift-setup
+        has been installed. This should be your local system that one
+        will use to deploy the swift systems remotely.
+
+        The command above will initialize some of the files
+        located under /etc/swift-setup/templates with information
+        provided within the swift-settup.conf configuration file.
+    '''
+
+    _deploy_usage = '''
+    swift-setup deploy [options]
+        The command above is used to deploy swift nodes such as admin,
+        proxy, storage, saio (proxy + storage services) and generic
+        swift systems.
+
+        Admin System:
             - git repository server
             - webserver for swift reports
             - central syslog system if dedicated box not available
             - ring builder server
             - proxy setup for account creation management
             - etc ...
-    '''
-    
-    _deploy_usage = '''
-    swift-setup deploy [options]
-        The command above is used to deploy swift nodes such as proxy, storage
-        or all-in-one nodes (proxy + storage services). To view more
-        information on 'deploy' command please run 'swift-setup help deploy'.
-        
+
         For more information please run 'swift-setup deploy --help'
     '''
 
@@ -75,107 +71,107 @@ def main():
         print "%s" % (_main_usage,)
         sys.exit(1)
 
-    if cmd not in ['templates', 'init', 'deploy']:
+    if cmd not in ['init', 'deploy']:
         print "\nInvalid command provided: %s" % (cmd,)
         print "%s" % (_main_usage,)
-        sys.exit(1)        
-    
-
-    if cmd == 'templates':
-        _templates_parser = OptionParser(usage=_templates_usage)
-        _templates_parser.add_option("-c", "--conf",
-            action="store", type="string",
-            default="/etc/swift-setup/swift-setup.conf",
-            dest="config",
-            help='Path to configuration file [default: %default]')
-        (options, args) = _templates_parser.parse_args()
-
-        if len(args) > 1:
-            _templates_parser.print_help()
-            sys.exit(1) 
-    
-        if not os.path.exists(config):
-            status = 500
-            msg = 'No Config file could be located (%s)' % (config,)
-            raise NoConfigeError(status, msg)
-
-        retval = make_templates(config)
-        if retval: 
-            print "Template files have been successfully generated"
+        sys.exit(1)
 
     if cmd == 'init':
         _init_parser = OptionParser(usage=_init_usage)
-        _init_parser.add_option("-c", "--conf",
+        _init_parser.add_option(
+            "-c", "--conf",
             action="store", type="string",
             default="/etc/swift-setup/swift-setup.conf",
             dest="config",
             help='Path to configuration file [default: %default]')
+
         (options, args) = _init_parser.parse_args()
 
         if len(args) > 1:
             _init_parser.print_help()
-            sys.exit(1) 
+            sys.exit(1)
         else:
-            initialize = TemplateGen(options.config, os.path.dirname(options.config))
+            initialize = TemplateGen(options.config,
+                                     os.path.dirname(options.config))
             if initialize.template_setup():
                 print "\t Template files have been initialized"
-                print "\t Location: " + os.path.dirname(options.config) + "/templates"
+                print ("\t Location: %s/templates"
+                       % os.path.dirname(options.config))
             else:
-                print "\t Template files have already been initialied before (aborting)"
+                print """
+                      \t Template files have already
+                      been initialied before (aborting)
+                      """
 
     if cmd == 'deploy':
         _deploy_parser = OptionParser(usage=_deploy_usage)
-        _deploy_parser.add_option("-c", "--conf",
+        _deploy_parser.add_option(
+            "-c", "--conf",
             action="store", type="string",
             default="/etc/swift-setup/swift-setup.conf",
             dest="config",
             help='Path to configuration file [default: %default]')
-        
-        _deploy_parser.add_option("-r", "--release",
-            action="store", type="string",
-            default="precise", dest="release",
-            help='Distribution release version '
-                 '[default: %default] '
-                 '[options: lucid, precise]')
 
-        _deploy_parser.add_option("-t", "--type",
+        _deploy_parser.add_option(
+            "-t", "--type",
             action="store", type="string",
             default="generic", dest="sys_type",
             help='Nodes that could be part of a swift cluster that are '
                  'available to be deployed by this tool. [default: %default] '
-                 '[possible types: proxy, storage, saio, generic, lb, syslog] '
-                 'NOTE: These must be DSH groups as well')
+                 '[possible types: admin, proxy, storage, saio, generic]')
 
-        _deploy_parser.add_option("-H", "--host",
+        _deploy_parser.add_option(
+            "-H", "--host",
             action="store", type="string",
             default=None, dest="single_host",
             help="Single host to run the setup against (default: %default)")
 
-        _deploy_parser.add_option("-p", "--platform",
-           action="store", type="string",
-           default=None, dest="platform",
-           help='Hardware Platform Type [default: %default] '
-                '[Available Options: dell]')
-
-        _deploy_parser.add_option("-g", "--dsh-group",
+        _deploy_parser.add_option(
+            "-p", "--platform",
             action="store", type="string",
-            default=None, dest="dsh_group",
-            help='Uses the indicated DSH group instead of trying to use '
-                 'a group that matches the system type to be deployed. '
-                 'Use with care and make sure the group exists '
-                 '[default: %default]')
+            default=None, dest="platform",
+            help='Hardware Platform Type [default: %default] '
+                 '[Available Options: dell]')
+
+        _deploy_parser.add_option(
+            "-g", "--group",
+            action="store", type="string",
+            default=None, dest="host_group",
+            help='Uses a host group file that should be located under '
+                 '/etc/swift-setup/hosts by default. Use with care and '
+                 'make sure the group exists [default: %default]')
 
         (options, args) = _deploy_parser.parse_args()
 
         if len(args) > 1:
             _deploy_parser.print_help()
-            sys.exit(1) 
-        else:
-            print "calling deploy function\n"
+            sys.exit(1)
 
+        '''
+        If a host is provided than the setup will
+        only happen on this single host as desired
+        '''
+        if options.single_host:
+            host_list = [options.single_host, ]
+        elif options.host_group:
+            host_list = generate_hosts_list(os.path.dirname(options.config),
+                                            options.host_group)
+        else:
+            status = 404
+            msg = "No single host or host group file provided"
+            raise HostListError(status, msg)
+
+        node = DeployNode(options.config)
+        ret = node.deploy_me(options.sys_type, options.platform, host_list)
+
+        if ret:
+            print "\t All node(s) have been deployed successfully"
+        else:
+            status = 500
+            msg = "Node(s) deployement has failed"
+            raise ResponseError(status, msg)
 
     return 0
-
 
 if __name__ == '__main__':
     status = main()
