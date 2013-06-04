@@ -87,14 +87,6 @@ class DeployNode(object):
         admin_pkgs = ['rsync', 'dsh', 'git', 'git-core', 'nginx',
                       'subversion', 'git-daemon-sysvinit']
 
-        self.tmpl_dir = self.base_dir + '/templates'
-        if not os.path.isfile(self.tmpl_dir + '/.initialized'):
-            print "\tTemplates have not yet been initialized. Please first"
-            print "\tmake proper changes to the swift-setup.conf file and than"
-            print "\trun swift-setup init with sudo or as root user\n\n"
-            disconnect_all()
-            exit(1)
-
         with settings(hide('running', 'stdout', 'stderr', 'warnings')):
             sudo('apt-get install %s %s ' % (self.apt_opts,
                                              ' '.join(admin_pkgs)))
@@ -118,6 +110,15 @@ class DeployNode(object):
         This function is used to deploy the node type requested. It will
         use some helper function to accomplish this.
         """
+
+        self.tmpl_dir = self.base_dir + '/templates'
+        if not os.path.isfile(self.tmpl_dir + '/.initialized'):
+            print "\tTemplates have not yet been initialized. Please first"
+            print "\tmake proper changes to the swift-setup.conf file and than"
+            print "\trun swift-setup init with sudo or as root user\n\n"
+            return False
+            exit(1)
+
         execute(self._common_setup, hosts=host_list)
 
         if type == 'admin':
