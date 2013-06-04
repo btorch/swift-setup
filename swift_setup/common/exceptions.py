@@ -47,15 +47,19 @@ class ConfigSyncError(ResponseError):
 
 class TemplateFileError(ResponseError):
     """
-    Raised when something goes wrong
-    manipulating a template file.
+    Raised when something goes wrong manipulating a template file.
     """
     pass
 
 
 class DiskSetupError(ResponseError):
     """
-    Raised when something goes wrong
-    setting up the disks.
+    Raised when something goes wrong setting up the disks.
+    """
+    pass
+
+class UploadTemplatesError(ResponseError):
+    """
+    Raised when something goes wrong uploading templates
     """
     pass
