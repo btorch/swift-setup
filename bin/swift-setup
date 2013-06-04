@@ -99,8 +99,8 @@ def main():
                 print ("\t Location: %s/templates"
                        % os.path.dirname(options.config))
             else:
-                print ("\t Template files have already
-                       been initialied before. Aborting...")
+                print "\t Template files have already"
+                print "\t been initialied before. Aborting..."
 
     if cmd == 'deploy':
         _deploy_parser = OptionParser(usage=_deploy_usage)
