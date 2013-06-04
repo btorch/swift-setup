@@ -117,7 +117,6 @@ class DeployNode(object):
             print "\tmake proper changes to the swift-setup.conf file and than"
             print "\trun swift-setup init with sudo or as root user\n\n"
             return False
-            exit(1)
 
         execute(self._common_setup, hosts=host_list)
 
