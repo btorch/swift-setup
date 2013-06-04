@@ -61,6 +61,28 @@ class DeployNode(object):
             msg = 'SSH private key could not be located [%s]' % self.key
             raise ResponseError(status, msg)
 
+    def _sync_files(self, sys_type='generic'):
+        """
+        Syncing repo files to admin /
+        """
+        sys_path = {'admin': '/root/local/admin/',
+                    'proxy': '/root/local/proxy/',
+                    'storage': '/root/local/storage/',
+                    'generic': '/root/local/common/'}
+
+        if sys_type == 'generic':
+            sudo('rsync -aq0c --exclude=".git" --exclude=".ignore" %s /'
+                 % (sys_path[sys_type]))
+        elif sys_type == 'saio':
+            for x in ['generic', 'proxy', 'storage']:
+                sudo('rsync -aq0c --exclude=".git" --exclude=".ignore" %s /'
+                     % (sys_path[x]))
+        else:
+            sudo('rsync -aq0c --exclude=".git" --exclude=".ignore" %s /'
+                 % (sys_path['generic']))
+            sudo('rsync -aq0c --exclude=".git" --exclude=".ignore" %s /'
+                 % (sys_path[sys_type]))
+
     def _common_setup(self):
         """
         Start by updating the apt db and performing an upgrade of general
@@ -108,6 +130,7 @@ class DeployNode(object):
                 Let's change the ownership of the pushed templates
                 """
                 sudo('chown -R root.root %s' % remote_path)
+
                 """
                 Initialize git repo
                 """
@@ -122,11 +145,12 @@ class DeployNode(object):
                     status = 500
                     msg = 'Issue initializing git repo on admin setup'
                     raise ResponseError(status, msg)
+                sudo('git clone -q file:///%s /root/local' % (remote_path,))
+
                 """
                 Syncing repo files to admin /
                 """
-                sudo('rsync -aq0c --exclude=".git" --exclude=".ignore" %s /'
-                     % (remote_path))
+                self._sync_files('admin')
 
                 """
                 Restarting some services
