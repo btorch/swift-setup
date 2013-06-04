@@ -83,6 +83,39 @@ class DeployNode(object):
             sudo('rsync -aq0c --exclude=".git" --exclude=".ignore" %s /'
                  % (sys_path[sys_type]))
 
+    def _swift_install(self, sys_type='generic'):
+        """
+        Installs the swift packages according to the system type
+        """
+        sudo('''
+             export DEBIAN_FRONTEND=noninteractive;
+             apt-get update -qq -o Acquire::http::No-Cache=True;
+             ''')
+        sudo('''
+             export DEBIAN_FRONTEND=noninteractive;
+             apt-get install %s %s
+             ''' % (self.apt_opts, ' '.join(self.swift_generic)))
+
+        if sys_type == 'proxy':
+            sudo('''
+                 export DEBIAN_FRONTEND=noninteractive;
+                 apt-get install %s %s
+                 ''' % (self.apt_opts, ' '.join(self.swift_proxy +
+                                                self.swift_others)))
+        elif sys_type == 'storage':
+            sudo('''
+                 export DEBIAN_FRONTEND=noninteractive;
+                 apt-get install %s %s
+                 ''' % (self.apt_opts, ' '.join(self.swift_storage +
+                                                self.swift_others)))
+        elif sys_type == 'saio':
+            sudo('''
+                 export DEBIAN_FRONTEND=noninteractive;
+                 apt-get install %s %s
+                 ''' % (self.apt_opts, ' '.join(self.swift_proxy +
+                                                self.swift_storage +
+                                                self.swift_others)))
+
     def _common_setup(self):
         """
         Start by updating the apt db and performing an upgrade of general
@@ -151,6 +184,11 @@ class DeployNode(object):
                 Syncing repo files to admin /
                 """
                 self._sync_files('admin')
+
+                """
+                Install swift packages for admin system
+                """
+                self._swift_install('admin')
 
                 """
                 Restarting some services
