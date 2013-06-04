@@ -1,7 +1,9 @@
 """ See COPYING for license information """
 
 import os
-from swift_setup.common.exceptions import ConfigFileError, ResponseError
+from sys import exit
+from swift_setup.common.exceptions import ConfigFileError, \
+    ResponseError, UploadTemplatesError
 from swift_setup.common.utils import readconf
 from fabric.api import *
 from fabric.network import *
@@ -15,18 +17,24 @@ class DeployNode(object):
     """
 
     def __init__(self, conf_file):
-        self.conf = readconf(conf_file, 'common')
-        self.user = self.conf['ssh_user']
-        self.key = self.conf['ssh_key']
-        self.apt_opts = self.conf['apt_options']
-        self.swift_generic = self.conf['swift_generic']
-        self.swift_proxy = self.conf['swift_proxy']
-        self.swift_storage = self.conf['swift_storage']
+        self.base_dir = os.path.dirname(conf_file)
 
-        if 'swift_others' in self.conf:
-            self.swift_others = self.conf['swift_others']
-        else:
-            self.swift_others = None
+        "Info for common section"
+        self.conf = readconf(conf_file, 'common')
+        self.user = self.conf.get('ssh_user', 'swiftops')
+        self.key = self.conf.get('ssh_key', '/home/swiftops/.ssh/id_rsa')
+        self.apt_opts = self.conf.get('apt_options', '-y -qq --force-yes')
+        self.swift_generic = self.conf.get('swift_generic')
+        self.swift_proxy = self.conf.get('swift_proxy')
+        self.swift_storage = self.conf.get('swift_storage')
+        self.swift_others = self.conf.get('swift_others', '')
+
+        "Info for versioning"
+        self.conf = readconf(conf_file, 'versioning')
+        self.ver_system = self.conf.get('versioning_system', 'git')
+        self.repo_base = self.conf.get('repository_base', '/srv/git')
+        self.repo_name = self.conf.get('repository_name',
+                                       'swift-cluster-configs')
 
         "Some Fabric environmental variables"
         env.user = self.user
@@ -46,7 +54,7 @@ class DeployNode(object):
                               'nmon', 'strace', 'iotop', 'debsums',
                               'python-pip', 'snmpd', 'snmp', 'bsd-mailx',
                               'xfsprogs', 'ntp', 'snmp-mibs-downloader',
-                              'exim4']
+                              'exim4', 'screen']
 
         if not os.path.isfile(self.key):
             status = 404
@@ -59,7 +67,7 @@ class DeployNode(object):
         packages avaialable. Then install the cloud keyring and some
         other general tools that may come in handy at some point.
         """
-        with settings(hide('running', 'stdout', 'stderr')):
+        with settings(hide('running', 'stdout', 'stderr', 'warnings')):
             sudo('''
                  export DEBIAN_FRONTEND=noninteractive;
                  apt-get update -qq -o Acquire::http::No-Cache=True;
@@ -71,12 +79,49 @@ class DeployNode(object):
                  ''' % (self.apt_opts,
                         ' '.join(self.keyrings + self.general_tools)))
 
+    def _admin_setup(self):
+        """
+        This function will take care of setting up the admin
+        system with what is needed
+        """
+        admin_pkgs = ['rsync', 'dsh', 'git', 'git-core', 'nginx',
+                      'subversion', 'git-daemon-sysvinit']
+
+        self.tmpl_dir = self.base_dir + '/templates'
+        if not os.path.isfile(self.tmpl_dir + '/.initialized'):
+            print "\tTemplates have not yet been initialized. Please first"
+            print "\tmake proper changes to the swift-setup.conf file and than"
+            print "\trun swift-setup init with sudo or as root user\n\n"
+            disconnect_all()
+            exit(1)
+
+        with settings(hide('running', 'stdout', 'stderr', 'warnings')):
+            sudo('apt-get install %s %s ' % (self.apt_opts,
+                                             ' '.join(admin_pkgs)))
+            if not sudo('test -e %s'
+                        % (self.repo_base + '/' + self.repo_name)).succeeded:
+                sudo('mkdir -p %s' % (self.repo_base + '/' + self.repo_name))
+                local_path = self.tmpl_dir + '/*'
+                remote_path = self.repo_base + '/' + self.repo_name + '/'
+                if put(local_path, remote_path,
+                       use_sudo=True, mirror_local_mode=True).failed:
+                    status = 500
+                    msg = '''
+                          Uploading template files to remote admin system has
+                          failed. [remote path: %s]
+                          ''' % remote_path
+                    disconnect_all()
+                    raise UploadTemplatesError(status, msg)
+
     def deploy_me(self, type, platform, host_list):
         """
         This function is used to deploy the node type requested. It will
         use some helper function to accomplish this.
         """
         execute(self._common_setup, hosts=host_list)
+
+        if type == 'admin':
+            execute(self._admin_setup, hosts=host_list)
 
         disconnect_all()
         return True
