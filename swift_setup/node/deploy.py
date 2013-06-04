@@ -112,8 +112,8 @@ class DeployNode(object):
         with settings(hide('running', 'stdout', 'stderr', 'warnings')):
             sudo('apt-get install %s %s ' % (self.apt_opts,
                                              ' '.join(admin_pkgs)))
-            if not sudo('test -e %s'
-                        % (self.repo_base + '/' + self.repo_name)).succeeded:
+            if sudo('test -e %s'
+                    % (self.repo_base + '/' + self.repo_name)).failed:
                 sudo('mkdir -p %s' % (self.repo_base + '/' + self.repo_name))
                 local_path = self.tmpl_dir + '/*'
                 remote_path = self.repo_base + '/' + self.repo_name + '/'
@@ -155,7 +155,7 @@ class DeployNode(object):
                 """
                 Restarting some services
                 """
-                if sudo('service git-daemon restart').failed:
+                if sudo('service git-daemon start').failed:
                     status = 500
                     msg = 'Error restarting git-daemon'
                     raise ResponseError(status, msg)
@@ -163,6 +163,10 @@ class DeployNode(object):
                     status = 500
                     msg = 'Error restarting nginx'
                     raise ResponseError(status, msg)
+            else:
+                status = 500
+                msg = 'System has been setup previously ... Aborting'
+                raise ResponseError(status, msg)
 
     def deploy_me(self, type, platform, host_list):
         """
