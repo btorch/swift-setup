@@ -104,6 +104,41 @@ class DeployNode(object):
                           ''' % remote_path
                     disconnect_all()
                     raise UploadTemplatesError(status, msg)
+                """
+                Let's change the ownership of the pushed templates
+                """
+                sudo('chown -R root.root %s' % remote_path)
+                """
+                Initialize git repo
+                """
+                git_dir = remote_path + ".git"
+                sudo('git --git-dir=%s --work-tree=%s init'
+                     % (git_dir, remote_path))
+                sudo('git --git-dir=%s --work-tree=%s add .'
+                     % (git_dir, remote_path))
+                sudo('git --git-dir=%s --work-tree=%s commit -qam "initial"'
+                     % (git_dir, remote_path))
+                if sudo('test -e %s' % git_dir).failed:
+                    status = 500
+                    msg = 'Issue initializing git repo on admin setup'
+                    raise ResponseError(status, msg)
+                """
+                Syncing repo files to admin /
+                """
+                sudo('rsync -aq0c --exclude=".git" --exclude=".ignore" %s /'
+                     % (remote_path))
+
+                """
+                Restarting some services
+                """
+                if sudo('service git-daemon restart').failed:
+                    status = 500
+                    msg = 'Error restarting git-daemon'
+                    raise ResponseError(status, msg)
+                if sudo('service nginx restart').failed:
+                    status = 500
+                    msg = 'Error restarting nginx'
+                    raise ResponseError(status, msg)
 
     def deploy_me(self, type, platform, host_list):
         """
