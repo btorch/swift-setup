@@ -3,7 +3,7 @@
 import os
 from sys import exit
 from swift_setup.common.exceptions import ConfigFileError, \
-    ResponseError, UploadTemplatesError
+    ResponseError, UploadTemplatesError, ConfigSyncError
 from swift_setup.common.utils import readconf
 from fabric.api import *
 from fabric.network import *
@@ -29,12 +29,16 @@ class DeployNode(object):
         self.swift_storage = self.conf.get('swift_storage')
         self.swift_others = self.conf.get('swift_others', '')
 
-        "Info for versioning"
+        "Info for versioning section"
         self.conf = readconf(conf_file, 'versioning')
         self.ver_system = self.conf.get('versioning_system', 'git')
         self.repo_base = self.conf.get('repository_base', '/srv/git')
         self.repo_name = self.conf.get('repository_name',
                                        'swift-cluster-configs')
+
+        "Info for swift section"
+        self.conf = readconf(conf_file, 'swift_common')
+        self.admin_ip = self.conf.get('admin_ip', '172.16.0.254')
 
         "Some Fabric environmental variables"
         env.user = self.user
@@ -83,6 +87,33 @@ class DeployNode(object):
             sudo('rsync -aq0c --exclude=".git" --exclude=".ignore" %s /'
                  % (sys_path[sys_type]))
 
+    def _setup_swiftuser(self):
+        """
+        Setting up the user allows one to avoid issues when the UID
+        could later on be changed from system setup to another due to
+        some ubuntu changes as it has happened before with mlocate
+        """
+        if run('id swift', quiet=True).failed:
+            sudo('groupadd -g 400 swift')
+            sudo('useradd -u 400 -g swift -G adm -M -s /bin/false swift')
+
+    def _pull_configs(self, sys_type):
+        """
+        This function will git clone the repo on the admin box
+        and then sync it over to the root
+        """
+        if sudo('test -d /root/local').succeeded:
+            sudo('mv -f /root/local /root/local.old')
+
+        sudo('git clone git://%s/%s /root/local' % (self.admin_ip,
+                                                    self.repo_name))
+        if sudo('test -d /root/local/common').failed:
+            status = 404
+            msg = 'Directory was not found! (/root/local/common)'
+            raise ConfigSyncError(status, msg)
+
+        self._sync_files(sys_type)
+
     def _swift_install(self, sys_type='generic'):
         """
         Installs the swift packages according to the system type
@@ -92,6 +123,7 @@ class DeployNode(object):
              apt-get update -qq -o Acquire::http::No-Cache=True;
              ''')
         sudo('apt-get install %s %s' % (self.apt_opts, self.swift_generic))
+        self._setup_swiftuser()
 
         if sys_type == 'proxy':
             sudo('''
@@ -103,7 +135,7 @@ class DeployNode(object):
                  ''' % (self.apt_opts, self.swift_storage, self.swift_others))
         elif sys_type == 'saio':
             sudo('''
-                 apt-get install %s %s %s
+                 apt-get install %s %s %s %s
                  ''' % (self.apt_opts, self.swift_proxy,
                         self.swift_storage, self.swift_others))
 
@@ -124,6 +156,27 @@ class DeployNode(object):
                  apt-get install %s %s
                  ''' % (self.apt_opts,
                         ' '.join(self.keyrings + self.general_tools)))
+
+    def _swift_proxy_setup(self):
+        """
+        Really just a wrapper function to identify task
+        """
+        self._pull_configs('proxy')
+        self._swift_install('proxy')
+
+    def _swift_storage_setup(self):
+        """
+        Really just a wrapper function to identify task
+        """
+        self._pull_configs('storage')
+        self._swift_install('storage')
+
+    def _swift_generic_setup(self):
+        """
+        Really just a wrapper function to identify task
+        """
+        self._pull_configs('generic')
+        self._swift_install()
 
     def _admin_setup(self):
         """
@@ -172,9 +225,11 @@ class DeployNode(object):
 
                 if sudo('test -e /root/local').succeeded:
                     sudo('mv -f /root/local /root/local.old')
-                    sudo('git clone -q file:///%s /root/local' % (remote_path,))
+                    sudo('git clone -q file:///%s /root/local'
+                         % (remote_path,))
                 else:
-                    sudo('git clone -q file:///%s /root/local' % (remote_path,))
+                    sudo('git clone -q file:///%s /root/local'
+                         % (remote_path,))
 
                 """
                 Syncing repo files to admin /
@@ -231,6 +286,12 @@ class DeployNode(object):
 
         if type == 'admin':
             execute(self._admin_setup, hosts=host_list)
+        elif type == 'proxy':
+            execute(self._swift_proxy_setup, hosts=host_list)
+        elif type == 'storage':
+            execute(self._swift_storage_setup, hosts=host_list)
+        elif type == 'generic':
+            execute(self._swift_generic_setup, hosts=host_list)
 
         disconnect_all()
         return True
