@@ -122,8 +122,8 @@ class DeployNode(object):
              export DEBIAN_FRONTEND=noninteractive;
              apt-get update -qq -o Acquire::http::No-Cache=True;
              ''')
-        sudo('apt-get install %s %s' % (self.apt_opts, self.swift_generic))
         self._setup_swiftuser()
+        sudo('apt-get install %s %s' % (self.apt_opts, self.swift_generic))
 
         if sys_type == 'proxy':
             sudo('''
