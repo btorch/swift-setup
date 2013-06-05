@@ -91,30 +91,21 @@ class DeployNode(object):
              export DEBIAN_FRONTEND=noninteractive;
              apt-get update -qq -o Acquire::http::No-Cache=True;
              ''')
-        sudo('''
-             export DEBIAN_FRONTEND=noninteractive;
-             apt-get install %s %s
-             ''' % (self.apt_opts, ' '.join(self.swift_generic)))
+        sudo('apt-get install %s %s' % (self.apt_opts, self.swift_generic))
 
         if sys_type == 'proxy':
             sudo('''
-                 export DEBIAN_FRONTEND=noninteractive;
-                 apt-get install %s %s
-                 ''' % (self.apt_opts, ' '.join(self.swift_proxy +
-                                                self.swift_others)))
+                 apt-get install %s %s %s
+                 ''' % (self.apt_opts, self.swift_proxy, self.swift_others))
         elif sys_type == 'storage':
             sudo('''
-                 export DEBIAN_FRONTEND=noninteractive;
-                 apt-get install %s %s
-                 ''' % (self.apt_opts, ' '.join(self.swift_storage +
-                                                self.swift_others)))
+                 apt-get install %s %s %s
+                 ''' % (self.apt_opts, self.swift_storage, self.swift_others))
         elif sys_type == 'saio':
             sudo('''
-                 export DEBIAN_FRONTEND=noninteractive;
-                 apt-get install %s %s
-                 ''' % (self.apt_opts, ' '.join(self.swift_proxy +
-                                                self.swift_storage +
-                                                self.swift_others)))
+                 apt-get install %s %s %s
+                 ''' % (self.apt_opts, self.swift_proxy,
+                        self.swift_storage, self.swift_others))
 
     def _common_setup(self):
         """
@@ -201,6 +192,18 @@ class DeployNode(object):
                     status = 500
                     msg = 'Error restarting nginx'
                     raise ResponseError(status, msg)
+                """
+                Reboot system
+                """
+                if sudo('reboot').failed:
+                    status = 500
+                    msg = 'Error trying to reboot system'
+                    raise ResponseError(status, msg)
+                else:
+                    print "Rebooting ... Please wait until it's back online"
+                    print "to proceed with any other deploys\n"
+                    print "Also verify that all required services"
+                    print "are running on the admin system after the reboot"
             else:
                 status = 500
                 msg = 'System has been setup previously ... Aborting'
