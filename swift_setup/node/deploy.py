@@ -169,7 +169,12 @@ class DeployNode(object):
                     status = 500
                     msg = 'Issue initializing git repo on admin setup'
                     raise ResponseError(status, msg)
-                sudo('git clone -q file:///%s /root/local' % (remote_path,))
+
+                if sudo('test -e /root/local').succeeded:
+                    sudo('mv -f /root/local /root/local.old')
+                    sudo('git clone -q file:///%s /root/local' % (remote_path,))
+                else:
+                    sudo('git clone -q file:///%s /root/local' % (remote_path,))
 
                 """
                 Syncing repo files to admin /
@@ -200,7 +205,7 @@ class DeployNode(object):
                     msg = 'Error trying to reboot system'
                     raise ResponseError(status, msg)
                 else:
-                    print "Rebooting ... Please wait until it's back online"
+                    print "\nRebooting ... Please wait until it's back online"
                     print "to proceed with any other deploys\n"
                     print "Also verify that all required services"
                     print "are running on the admin system after the reboot"
