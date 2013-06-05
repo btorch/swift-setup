@@ -161,22 +161,25 @@ class DeployNode(object):
         """
         Really just a wrapper function to identify task
         """
-        self._pull_configs('proxy')
-        self._swift_install('proxy')
+        with settings(hide('running', 'stdout', 'stderr', 'warnings')):
+            self._pull_configs('proxy')
+            self._swift_install('proxy')
 
     def _swift_storage_setup(self):
         """
         Really just a wrapper function to identify task
         """
-        self._pull_configs('storage')
-        self._swift_install('storage')
+        with settings(hide('running', 'stdout', 'stderr', 'warnings')):
+            self._pull_configs('storage')
+            self._swift_install('storage')
 
     def _swift_generic_setup(self):
         """
         Really just a wrapper function to identify task
         """
-        self._pull_configs('generic')
-        self._swift_install()
+        with settings(hide('running', 'stdout', 'stderr', 'warnings')):
+            self._pull_configs('generic')
+            self._swift_install()
 
     def _admin_setup(self):
         """
