@@ -161,10 +161,8 @@ def main():
             raise HostListError(status, msg)
 
         node = DeployNode(options.config)
-        ret = node.deploy_me(options.sys_type, options.platform, host_list)
-
-        if ret:
-            print "\t All node(s) have been deployed successfully"
+        if node.deploy_me(options.sys_type, options.platform, host_list):
+            print "\nAll node(s) have been deployed successfully"
         else:
             status = 500
             msg = "Node(s) deployement has failed"
