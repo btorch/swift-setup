@@ -71,6 +71,11 @@ def main():
     except:
         print "%s" % (_main_usage,)
         sys.exit(1)
+    
+    if sys.argv[2]:
+        if sys.argv[2] == '--help' or sys.argv[2] == '-h':
+            print "%s" % (_main_usage,)
+            sys.exit(1)
 
     if cmd not in ['init', 'deploy']:
         print "\nInvalid command provided: %s" % (cmd,)
@@ -123,7 +128,7 @@ def main():
             "-H", "--host",
             action="store", type="string",
             default=None, dest="single_host",
-            help="Single host to run the setup against (default: %default)")
+            help="Single host to run the setup against [default: %default]")
 
         _deploy_parser.add_option(
             "-p", "--platform",
