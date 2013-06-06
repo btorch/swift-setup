@@ -15,16 +15,14 @@ User Requirements
 
 Contribs
 ------------
-* There are several scripts under the contrib folder that can be helpful for pre/post swift setup
+* There are several scripts under the contrib folder that could be helpful 
 
 
 Installation
 ---------------
 Download the code into your local machine
-* Install it
-    > python setup.py install --prefix=/usr/local
-* Content Files
-    > Located under /etc/swift-setup
+> git clone git://github.com/btorch/swift-setup.git
+> python setup.py install --prefix=/usr/local
 
 
 Configuration
