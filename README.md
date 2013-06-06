@@ -21,8 +21,10 @@ Contribs
 Installation
 ---------------
 * Download the code into your local machine
-* Install it : python setup.py install --prefix=/usr/local
-* Content Files: /etc/swift-setup
+* Install it:
+    > python setup.py install --prefix=/usr/local
+* Content Files: 
+    > Located under /etc/swift-setup
 
 
 Configuration
