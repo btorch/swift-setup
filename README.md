@@ -22,9 +22,9 @@ Installation
 ---------------
 * Download the code into your local machine
 * Install it
-    > python setup.py install --prefix=/usr/local
+    > "python setup.py install --prefix=/usr/local"
 * Content Files
-    > Located under /etc/swift-setup
+    > "Located under /etc/swift-setup"
 
 
 Configuration
