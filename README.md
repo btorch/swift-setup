@@ -36,11 +36,11 @@ Usage
 ------
 * Initialize the templates
 
-- sudo swift-setup init
+sudo swift-setup init
 
 * Deploy systems (see swift-setup deploy --help)
 
-- swift-setup deploy -g storage -t storage
+swift-setup deploy -g storage -t storage
 
 
 
