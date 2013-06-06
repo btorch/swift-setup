@@ -1,0 +1,35 @@
+The following keystone tenants/users should be created for swift
+
+* Login to the keystone box or do it remotely 
+
+MY_IP=127.0.0.1
+# GRIZZLY
+OS_SERVICE_TOKEN=ADMIN ; OS_SERVICE_ENDPOINT=http://$MY_IP:35357/v2.0 ; export OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
+# FOLSOM
+SERVICE_TOKEN=ADMIN ; SERVICE_ENDPOINT=http://$MY_IP:35357/v2.0 ; export SERVICE_TOKEN SERVICE_ENDPOINT
+
+
+# Creating Token validation Tenant/User
+tenant_name="services" ; user_name="tokenvalidator" ; user_pass=CHOOSE_ONE 
+tenant_id=$(keystone tenant-create --name $tenant_name --description "Swift Services Tenant" | awk '/ id / {print $4}')
+role_id=$(keystone role-list | grep admin | awk '{ print $2}')
+user_id=$(keystone user-create --tenant-id $tenant_id --name $user_name --pass $user_pass  | awk '/ id / {print $4}')
+keystone user-role-add --user-id $user_id --role-id $role_id --tenant-id $tenant_id
+
+
+# Creating SwiftOPs Tenant/User
+tenant_name="swiftops" ; user_name="swiftops" ; user_pass=CHOOSE_ONE 
+tenant_id=$(keystone tenant-create --name $tenant_name --description "Swiftops Tenant" | awk '/ id / {print $4}')
+role_id=$(keystone role-list | grep admin | awk '{ print $2}')
+user_id=$(keystone user-create --tenant-id $tenant_id --name $user_name --pass $user_pass  | awk '/ id / {print $4}')
+keystone user-role-add --user-id $user_id --role-id $role_id --tenant-id $tenant_id
+
+
+# Creatinga Dispersion Report Tenant/User
+tenant_name="dispersion" ; user_name="reporter" ; user_pass=CHOOSE_ONE
+tenant_id=$(keystone tenant-create --name $tenant_name --description "Dispersion Report Tenant" | awk '/ id / {print $4}')
+role_id=$(keystone role-list | grep admin | awk '{ print $2}')
+user_id=$(keystone user-create --tenant-id $tenant_id --name $user_name --pass $user_pass  | awk '/ id / {print $4}')
+keystone user-role-add --user-id $user_id --role-id $role_id --tenant-id $tenant_id
+
+

@@ -1,0 +1,17 @@
+
+* To create a swift service catalog on keystone
+
+MY_IP=127.0.0.1
+# GRIZZLY
+OS_SERVICE_TOKEN=ADMIN ; OS_SERVICE_ENDPOINT=http://$MY_IP:35357/v2.0 ; export OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
+# FOLSOM
+SERVICE_TOKEN=ADMIN ; SERVICE_ENDPOINT=http://$MY_IP:35357/v2.0 ; export SERVICE_TOKEN SERVICE_ENDPOINT
+
+swift_pub_domain="FQDN"
+swift_int_domain="FQDN"
+
+# Create the Services Catalog
+swift_svc_id=$(keystone service-create --name="swift" --type="object-store" --description="Swift Service" | awk '/ id / { print $4 }')
+keystone endpoint-create --region RegionOne --service-id $swift_svc_id --publicurl "http://$swift_pub_domain/v1/AUTH_\$(tenant_id)s" \
+  --adminurl 'http://0.0.0.0/v1' --internalurl "http://$swift_int_domain/v1/AUTH_\$(tenant_id)s"
+
