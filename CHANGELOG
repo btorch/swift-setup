@@ -1,2 +1,7 @@
+Version 1.0.0 (2013-06-06)
+ * Release #1 of a working code
+ * It's currently capable of remotely deploy: 
+   admin, proxy, storage, generic and saio swift systems
+
 Version 0.0.1 (2013-05-23)
  * Initial upload of contents
