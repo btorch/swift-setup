@@ -169,6 +169,14 @@ class DeployNode(object):
         if not sys_type == '':
             sudo('swift-init all restart')
 
+        """
+        Reboot system
+        """
+        if sudo('reboot').failed:
+            status = 500
+            msg = 'Error trying to reboot system'
+            raise ResponseError(status, msg)
+
     def _swift_install(self, sys_type='generic'):
         """
         Installs the swift packages according to the system type
@@ -211,6 +219,9 @@ class DeployNode(object):
                  apt-get install %s %s
                  ''' % (self.apt_opts,
                         ' '.join(self.keyrings + self.general_tools)))
+            sudo('mv /etc/localtime /etc/localtime.old')
+            if sudo('test -e /usr/share/zoneinfo/UTC').succeeded:
+                sudo('cp /usr/share/zoneinfo/UTC /etc/localtime')
 
     def _swift_proxy_setup(self):
         """
