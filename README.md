@@ -20,7 +20,7 @@ Contribs
 
 Installation
 ---------------
-* Download the code into your local machine
+Download the code into your local machine
 * Install it
     > python setup.py install --prefix=/usr/local
 * Content Files
