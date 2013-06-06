@@ -121,7 +121,7 @@ class DeployNode(object):
         if sys_type == 'proxy':
             pkgs = self.swift_proxy.split() + self.swift_others.split()
         elif sys_type == 'storage':
-            pkgs = self.swift_storage.split() + self.swift_others.plit()
+            pkgs = self.swift_storage.split() + self.swift_others.split()
         elif sys_type == 'saio':
             pkgs = (self.swift_proxy.split() + self.swift_storage.split() +
                     self.swift_others.plit())
