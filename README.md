@@ -23,7 +23,7 @@ Installation
 Download the code into your local machine
 > git clone git://github.com/btorch/swift-setup.git
 
-> python setup.py install --prefix=/usr/local
+> cd swift-setup && python setup.py install --prefix=/usr/local
 
 
 Configuration
