@@ -35,12 +35,10 @@ Once the installation is completed you will have several files under /etc/swift-
 Usage
 ------
 * Initialize the templates
-
-sudo swift-setup init
+    > sudo swift-setup init
 
 * Deploy systems (see swift-setup deploy --help)
-
-swift-setup deploy -g storage -t storage
+    > swift-setup deploy -g storage -t storage
 
 
 
