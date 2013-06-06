@@ -56,8 +56,13 @@ Usage
     > sudo swift-setup init
 
 * Deploy systems (see swift-setup deploy --help)
-    > swift-setup deploy -g storage -t storage
+    > swift-setup deploy -H admin1.swift -t admin
 
+    > swift-setup deploy -g proxy-zone1 -t proxy
+
+    > swift-setup deploy -g storage-zone1 -t storage
+
+    > ....
 
 
 TODO
