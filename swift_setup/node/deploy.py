@@ -114,6 +114,64 @@ class DeployNode(object):
 
         self._sync_files(sys_type)
 
+    def _set_onhold(self, sys_type=''):
+        """
+        Sets the packages on hold to prevent upgrades
+        """
+        if sys_type == 'proxy':
+            pkgs = self.swift_proxy.split() + self.swift_others.split()
+        elif sys_type == 'storage':
+            pkgs = self.swift_storage.split() + self.swift_others.plit()
+        elif sys_type == 'saio':
+            pkgs = (self.swift_proxy.split() + self.swift_storage.split() +
+                    self.swift_others.plit())
+        else:
+            pkgs = self.swift_generic.split()
+
+        for name in pkgs:
+            sudo('echo "%s hold" | dpkg --set-selections' % name)
+
+    def _final_install_touches(self, sys_type=''):
+        """
+        Creates directories, sets ownerships, restart services .. etc
+        """
+        if sudo('test -e /var/cache/swift').failed:
+            sudo('mkdir -p /var/cache/swift')
+        sudo('chown -R swift.swift /var/cache/swift')
+
+        if sudo('test -e /var/log/swift/stats').failed:
+            sudo('mkdir -p /var/log/swift/stats')
+        sudo('chown -R swift.swift /var/log/swift/stats')
+
+        if sys_type == 'proxy':
+            if sudo('test -e /var/log/swift/hourly').failed:
+                sudo('mkdir -p /var/log/swift/hourly')
+
+        sudo('chown -R swift.swift /etc/swift')
+        sudo('rm -f /etc/swift/*.dpkg-dist')
+        sudo('newaliases')
+
+        if sys_type == 'storage' or sys_type == 'saio':
+            if sudo('test -e /srv/node').failed:
+                sudo('mkdir -p /srv/node')
+            sudo('chown swift.swift /srv/node/*')
+
+        """
+        Restart/Start some processes
+        """
+        sudo('service procps restart')
+        sudo('service ntp start')
+        sudo('service exim4 restart')
+        sudo('service syslog-ng restart')
+        if sys_type == 'storage' or sys_type == 'saio':
+            sudo('service rsync restart')
+
+        """
+        Bring up swift
+        """
+        if not sys_type == '':
+            sudo('swift-init all restart')
+
     def _swift_install(self, sys_type='generic'):
         """
         Installs the swift packages according to the system type
@@ -164,6 +222,8 @@ class DeployNode(object):
         with settings(hide('running', 'stdout', 'stderr', 'warnings')):
             self._pull_configs('proxy')
             self._swift_install('proxy')
+            self._set_onhold('proxy')
+            self._final_install_touches('proxy')
 
     def _swift_storage_setup(self):
         """
@@ -172,6 +232,8 @@ class DeployNode(object):
         with settings(hide('running', 'stdout', 'stderr', 'warnings')):
             self._pull_configs('storage')
             self._swift_install('storage')
+            self._set_onhold('storage')
+            self._final_install_touches('storage')
 
     def _swift_generic_setup(self):
         """
@@ -180,6 +242,8 @@ class DeployNode(object):
         with settings(hide('running', 'stdout', 'stderr', 'warnings')):
             self._pull_configs('generic')
             self._swift_install()
+            self._set_onhold('generic')
+            self._final_install_touches()
 
     def _admin_setup(self):
         """
