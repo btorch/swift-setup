@@ -118,16 +118,13 @@ class DeployNode(object):
         """
         Sets the packages on hold to prevent upgrades
         """
+        p = []
         if sys_type == 'proxy':
-            pkgs = self.swift_proxy.split() + self.swift_others.split()
+            p = self.swift_proxy.split() + self.swift_others.split()
         elif sys_type == 'storage':
-            pkgs = self.swift_storage.split() + self.swift_others.split()
-        elif sys_type == 'saio':
-            pkgs = (self.swift_proxy.split() + self.swift_storage.split() +
-                    self.swift_others.plit())
-        else:
-            pkgs = self.swift_generic.split()
+            p = self.swift_storage.split() + self.swift_others.split()
 
+        pkgs = self.swift_generic.split() + p
         for name in pkgs:
             sudo('echo "%s hold" | dpkg --set-selections' % name)
 
@@ -245,6 +242,13 @@ class DeployNode(object):
             self._set_onhold('generic')
             self._final_install_touches()
 
+    def _swift_saio_setup(self):
+        """
+        Really just a wrapper function to identify task
+        """
+        self._swift_storage_setup()
+        self._swift_proxy_setup()
+
     def _admin_setup(self):
         """
         This function will take care of setting up the admin
@@ -353,12 +357,14 @@ class DeployNode(object):
 
         if type == 'admin':
             execute(self._admin_setup, hosts=host_list)
+        elif type == 'generic':
+            execute(self._swift_generic_setup, hosts=host_list)
         elif type == 'proxy':
             execute(self._swift_proxy_setup, hosts=host_list)
         elif type == 'storage':
             execute(self._swift_storage_setup, hosts=host_list)
-        elif type == 'generic':
-            execute(self._swift_generic_setup, hosts=host_list)
+        elif type == 'saio':
+            execute(self._swift_saio_setup, hosts=host_list)
 
         disconnect_all()
         return True
