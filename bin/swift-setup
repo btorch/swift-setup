@@ -72,10 +72,9 @@ def main():
         print "%s" % (_main_usage,)
         sys.exit(1)
     
-    if sys.argv[2]:
-        if sys.argv[2] == '--help' or sys.argv[2] == '-h':
-            print "%s" % (_main_usage,)
-            sys.exit(1)
+    if cmd == '--help' or cmd == '-h':
+        print "%s" % (_main_usage,)
+        sys.exit(1)
 
     if cmd not in ['init', 'deploy']:
         print "\nInvalid command provided: %s" % (cmd,)
