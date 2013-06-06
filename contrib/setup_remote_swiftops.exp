@@ -42,13 +42,13 @@ if {$force_conservative} {
 # -Don
 
 # display usage
-if {$argc>4} {
-   send_user "usage: $argv0 ipaddr user password \[pub key file\]\n"
+if {$argc>3} {
+   send_user "usage: $argv0 ipaddr password \[pub key file\]\n"
    send_user "\t RSA public key defaults to /home/swiftops/.ssh/id_rsa.pub\n\n"
    exit
 }
-if {$argc<3} {
-   send_user "usage: $argv0 ipaddr user password \[pub key file\]\n"
+if {$argc<2} {
+   send_user "usage: $argv0 ipaddr password \[pub key file\]\n"
    send_user "\t RSA public key defaults to /home/swiftops/.ssh/id_rsa.pub\n\n"
    exit
 }
@@ -62,23 +62,27 @@ if {$whoami!=0} {
 
 # set Variables
 set ipaddr [lrange $argv 0 0]
-set user [lrange $argv 1 1]
-set password [lrange $argv 2 2]
-set pub_key [lrange $argv 3 3]
+set password [lrange $argv 1 1]
+set pub_key [lrange $argv 2 2]
 
 if { [string length $pub_key] == 0 } {
      set pub_key "/home/swiftops/.ssh/id_rsa.pub"
+     if {![file exists $pub_key]} {
+        send_user "\n No public RSA key found ($pub_key)"
+        send_user "\n Please try providing one \n\n"
+        exit
+     }
 }
 
 set timeout -1
-spawn scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=QUIET $pub_key $user@$ipaddr:/tmp/id_rsa.pub
+spawn scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=QUIET $pub_key root@$ipaddr:/tmp/id_rsa.pub
 match_max 5000
 #set expect_out(buffer) {}
 expect "*?assword:*"
 sleep .1
 send -- "$password\r"
 send_user "\n\n"
-spawn ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=QUIET $user@$ipaddr
+spawn ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=QUIET root@$ipaddr
 match_max 5000
 #set expect_out(buffer) {}
 expect "*?assword:*"
