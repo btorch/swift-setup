@@ -22,6 +22,7 @@ Installation
 ---------------
 Download the code into your local machine
 > git clone git://github.com/btorch/swift-setup.git
+
 > python setup.py install --prefix=/usr/local
 
 
@@ -36,9 +37,9 @@ Once the installation is completed you will have several files under /etc/swift-
     > You MUST set this up if you will be deploying servers in groups
 
 * templates/ 
-    > Contains all the files that will be loaded into the admin system git server repo
+    > Contains all the files that will be loaded into the admin system git server repo.
     > If you have extra files that would like to be pushed to the admin system on the initial git repo
-    > setup please include them here on the approrite location
+    > setup please include them here on the approrite location.
 * templates/common
     > Files common to all swift systems (admin, proxy, storage, generic, saio)
 * templates/admin
