@@ -136,6 +136,9 @@ class DeployNode(object):
             sudo('mkdir -p /var/cache/swift')
         sudo('chown -R swift.swift /var/cache/swift')
 
+        if sudo(test -e /var/log/swift).failed:
+            sudo('mkdir -p /var/log/swift')
+
         if sudo('test -e /var/log/swift/stats').failed:
             sudo('mkdir -p /var/log/swift/stats')
         sudo('chown -R swift.swift /var/log/swift/stats')
@@ -266,7 +269,7 @@ class DeployNode(object):
         system with what is needed
         """
         admin_pkgs = ['rsync', 'dsh', 'git', 'git-core', 'nginx',
-                      'subversion', 'git-daemon-sysvinit']
+                      'subversion', 'git-daemon-sysvinit', 'expect']
 
         with settings(hide('running', 'stdout', 'stderr', 'warnings')):
             sudo('apt-get install %s %s ' % (self.apt_opts,
