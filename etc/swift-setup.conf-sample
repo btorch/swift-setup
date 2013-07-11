@@ -6,7 +6,7 @@ ssh_key = /tmp/id_rsa_swiftops.priv
 swift_generic = swift python-swift python-swiftclient
 swift_proxy = swift-proxy python-keystone python-keystoneclient memcached python-memcache
 swift_storage = swift-account swift-container swift-object
-swift_others = python-suds python-slogging
+swift_others = python-suds 
 apt_options = -y -qq --force-yes -o Dpkg::Options::=--force-confdef
 
 [swift_common]
