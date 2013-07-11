@@ -19,6 +19,7 @@ pipeline = catch_errors healthcheck proxy-logging cache ratelimit authtoken keys
 memcache_maxmem = 512
 sim_connections = 1024
 memcache_server_list = 127.0.0.1:11211
+authtoken_factory = keystoneclient.middleware.auth_token:filter_factory
 
 [mailing]
 email_addr = me@mydomain.com
