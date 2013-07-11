@@ -66,9 +66,10 @@ class TemplateGen(object):
             location + 'swift/dispersion.conf': ('KEYSTONE_IP',
                                                  'KEYSTONE_PORT',
                                                  'KEYSTONE_AUTH_PROTO',
-                                                 'KEYSTONE_ADMIN_TENANT',
-                                                 'KEYSTONE_ADMIN_USER',
-                                                 'KEYSTONE_ADMIN_KEY')
+                                                 'DIS_TENANT',
+                                                 'DIS_USER',
+                                                 'DIS_KEY',
+                                                 'DIS_COVERAGE')
         }
         self._update_files(templates)
 
