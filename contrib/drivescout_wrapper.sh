@@ -41,7 +41,7 @@ exit 1
 
 
 # Variables
-ip_adr=$1
+ip_addr=$1
 zone=$2
 region=${3:-1}
 mount_prefix="/srv/node"
