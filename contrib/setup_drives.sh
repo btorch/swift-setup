@@ -152,6 +152,7 @@ hw_drive_setup() {
         $parted -s /dev/$disk mklabel gpt
         sz=$(parted -s /dev/$disk print | grep "Disk"|cut -d ":" -f 2|tr -d " ")
         $parted -s /dev/$disk mkpart primary xfs 0 $sz
+        sleep 3
         $mkfs -i size=$inode_size -d su=64k,sw=1 -f -L $disk_label /dev/$disk"1"
         mkdir -p /srv/node/$disk_label 
         fstab_line="LABEL=$disk_label /srv/node/$disk_label xfs defaults,noatime,nodiratime,nobarrier,logbufs=8  0  0"
@@ -160,6 +161,7 @@ hw_drive_setup() {
             echo "$fstab_line" >> /etc/fstab
         fi
     done
+    sleep 3
     mount -a
 }
 
@@ -172,6 +174,7 @@ vm_drive_setup() {
         $parted -s /dev/$disk mklabel gpt
         sz=$(parted -s /dev/$disk print | grep "Disk"|cut -d ":" -f 2|tr -d " ")
         $parted -s /dev/$disk mkpart primary xfs 0 $sz
+        sleep 3
         $mkfs -i size=$inode_size -d su=64k,sw=1 -f -L $disk /dev/$disk"1"
         mkdir -p /srv/node/$disk 
         fstab_line="LABEL=$disk /srv/node/$disk xfs defaults,noatime,nodiratime,nobarrier,logbufs=8  0  0"
@@ -180,6 +183,7 @@ vm_drive_setup() {
             echo "$fstab_line" >> /etc/fstab
         fi        
     done
+    sleep 3
     mount -a
 }
 
