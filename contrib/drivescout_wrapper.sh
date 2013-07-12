@@ -29,9 +29,9 @@ usage_display (){
 cat << USAGE
 
 Syntax:
-    sudo drivescout_wrapper.sh [ip address/ip range] [zone/zone-range]  [region]
+    sudo drivescout_wrapper.sh [ip address/ip range] [zone]  [region]
       - IP range as "1.1.1.1-254"
-      - Zone can be either a single zone or a range like 1-5
+      - Zone where servers should be located
       - Region, if not specified it will default to 1
 
       For more detailed help see "drivescout -h" 
@@ -49,10 +49,6 @@ mount_prefix="/srv/node"
 if [[ $num_of_args -lt 2 ]]; then 
     printf "\nError: Must have all arguments defined\n"
     usage_display
-fi
-
-if [[ "$zone" =~ ^[0-9]+[0-9]*-[0-9]+[0-9]*$ ]]; then
-    zone_range="true"
 fi
 
 
@@ -74,13 +70,7 @@ do
         ;;
     esac
 
-    if [[ "$zone_range" == "true" ]]; then
-        for (( i=${zone%-*}; i<=${zone#*-}; i++)); do
-            echo "drivescout -v -y -w 100  --region=$region --mount-prefix=$mount_prefix -r $ip_addr -p $port -z $i /etc/swift/$x.builder"
-        done
-    else
-        echo "drivescout -v -y -w 100  --region=$region --mount-prefix=$mount_prefix -r $ip_addr -p $port -z $zone /etc/swift/$x.builder"
-    fi        
+    echo "drivescout -v -y -w 100  --region=$region --mount-prefix=$mount_prefix -r $ip_addr -p $port -z $zone /etc/swift/$x.builder"
 done
 
 printf "\nPlease remember to rebalance all *.builder files"
