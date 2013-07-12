@@ -76,11 +76,13 @@ do
 
     if [[ "$zone_range" == "true" ]]; then
         for (( i=${zone%-*}; i<=${zone#*-}; i++)); do
-            drivescout -v -y -w 100  --region=$region --mount-prefix=$mount_prefix -r $ip_addr -p $port -z $i /etc/swift/$x.builder
+            echo "drivescout -v -y -w 100  --region=$region --mount-prefix=$mount_prefix -r $ip_addr -p $port -z $i /etc/swift/$x.builder"
         done
     else
-        drivescout -v -y -w 100  --region=$region --mount-prefix=$mount_prefix -r $ip_addr -p $port -z $zone /etc/swift/$x.builder
+        echo "drivescout -v -y -w 100  --region=$region --mount-prefix=$mount_prefix -r $ip_addr -p $port -z $zone /etc/swift/$x.builder"
     fi        
 done
+
+printf "\nPlease remember to rebalance all *.builder files"
 exit 0
 
