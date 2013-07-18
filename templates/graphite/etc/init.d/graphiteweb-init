@@ -1,0 +1,40 @@
+#! /bin/sh
+# /etc/init.d/graphiteweb
+
+### BEGIN INIT INFO
+# Provides:          graphiteweb
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts the graphiteweb daemon
+# Description:       starts/stops graphiteweb
+### END INIT INFO
+
+# Some things that run always
+touch /var/lock/graphiteweb
+
+GRAPHITEWEB_HOME=/opt/graphite/webapp/graphite
+GRAPHITEWEB_USER=root
+PIDFILE=/var/run/graphiteweb/graphiteweb.pid
+GUNICORN_OPTS='--workers=2 -D -b 0.0.0.0:80 -k eventlet -u www-data -g www-data'
+
+# Carry out specific functions when asked to by the system
+case "$1" in
+    start)
+        echo "Starting graphiteweb via gunicorn"
+        su $GRAPHITEWEB_USER -c "cd $GRAPHITEWEB_HOME && gunicorn_django $GUNICORN_OPTS"
+        ;;
+    stop)
+        echo "Stopping graphiteweb"
+        killall gunicorn_django
+        rm /var/lock/graphiteweb
+        ;;
+    *)
+        echo "Usage: /etc/init.d/graphiteweb {start|stop}"
+        exit 1
+        ;;
+esac
+
+exit 0
+
